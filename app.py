@@ -6,12 +6,18 @@ from openai import OpenAI
 # Configuration
 # Secrets are loaded from .streamlit/secrets.toml (local) or Streamlit Cloud secrets
 try:
-    APP_PASSWORD = st.secrets["app_password"]
+    # Use .get() to avoid KeyError and provide clearer error messages
+    APP_PASSWORD = st.secrets.get("app_password")
+    if APP_PASSWORD is None:
+        st.error("Secret 'app_password' not found in secrets.toml!")
+        st.stop()
+        
     MODEL_ID = "ft:gpt-4o-mini-2024-07-18:personal::Czi7N6OW"
+    
     # We prioritize the secret key, but fall back to env var if needed
     EMBEDDED_API_KEY = st.secrets.get("openai_api_key", os.environ.get("OPENAI_API_KEY", ""))
-except FileNotFoundError:
-    st.error("Secrets file not found! Please check .streamlit/secrets.toml")
+except Exception as e:
+    st.error(f"Error loading secrets: {e}")
     st.stop()
 
 # Page Setup
